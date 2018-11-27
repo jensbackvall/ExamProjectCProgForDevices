@@ -1,3 +1,24 @@
+//#include arduino.h
+
+#define DCC_PIN 6                      // DCC out
+#define TIMER_SHORT 0x8D               // 58usec pulse length 141 255-141=114
+#define TIMER_LONG  0x1B               // 116usec pulse length 27 255-27 =228
+#define PREAMBLE  0                    // definitions for state machine
+
+
+bool second_isr = false;               // pulse up or down
+unsigned char last_timer = TIMER_SHORT; // store last timer value
+unsigned char flag = 0;                // used for short or long pulse
+unsigned char state = PREAMBLE;
+unsigned char preamble_count = 16;
+unsigned char outbyte = 0;
+unsigned char cbit = 0x80;
+unsigned char preample1;               // global variabel for preample part 1
+unsigned char preample2;               // global variabel for preample part 2
+unsigned char lokoadr = 40;            // global variabel adresse
+unsigned char data = 96;               // global variabel kommando
+unsigned char layoutAddress = 102;      // global variabel layoutAdresse
+
 struct Message                         // buffer for command
 {
   unsigned char data[7];
@@ -10,6 +31,8 @@ struct Message msg[MAXMSG] =
   { { 0xFF,     0, 0xFF, 0, 0, 0, 0}, 3}    // message
 };
 
+// TCCR2A, TCCR2B, TIMSK2, TCNT2 as well as TIMER2_OVF_vect i ISR are all defined in the arduino,
+// and thus are not defined in this scope, but are accessed via arduino.h
 void SetupTimer2()
 {
   TCCR2A = 0; //page 203 - 206 ATmega328/P

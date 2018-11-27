@@ -1,3 +1,6 @@
+#include "DataFuncs.h"
+
+
 
 void assembleAndSendSpeed(unsigned char newSpeed) {
   data = newSpeed;
