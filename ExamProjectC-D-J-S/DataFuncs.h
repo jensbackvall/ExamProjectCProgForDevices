@@ -1,11 +1,10 @@
-#ifndef DataFuncs.h
-#define DataFuncs.h
+#ifndef DATAFUNCS_h
+#define DATAFUNCS_h
 
-void SetupTimer2()
-
-ISR(TIMER2_OVF_vect) //Timer2 overflow interrupt vector handler
-
-void assemble_dcc_msg()
+extern void SetupTimer2();
+ISR(TIMER2_OVF_vect); //Timer2 overflow interrupt vector handler
+extern void assemble_dcc_msg();
+extern void setData(unsigned char);
 
 
 #endif
