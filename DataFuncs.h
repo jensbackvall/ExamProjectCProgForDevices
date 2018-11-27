@@ -95,3 +95,17 @@ ISR(TIMER2_OVF_vect) //Timer2 overflow interrupt vector handler
     }
   }
 }
+
+void assemble_dcc_msg()
+{
+  noInterrupts();  // make sure that only "matching" parts of the message are used in ISR
+  msg[1].data[0] = lokoadr;
+  msg[1].data[1] = data;
+  msg[1].data[2] = lokoadr ^ data;
+  //Serial.print(lokoadr);
+  //Serial.print("  ");
+  //Serial.print(data);
+  //Serial.println();
+
+  interrupts();
+}
