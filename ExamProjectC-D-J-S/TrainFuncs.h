@@ -1,10 +1,12 @@
-#include "DataFuncs.h"
-
+#ifndef TrainFuncs.h
+#define TrainFuncs.h
 
 
 void assembleAndSendSpeed(unsigned char newSpeed) {
-  data = newSpeed;
-  assemble_dcc_msg();
-  delay(750);
 }
 
+
+void assembleAndSendOrder(unsigned char trainFunction) {
+}
+
+#endif

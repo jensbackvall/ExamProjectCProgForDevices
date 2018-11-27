@@ -4,8 +4,12 @@
 #define TIMER_SHORT 0x8D               // 58usec pulse length 141 255-141=114
 #define TIMER_LONG  0x1B               // 116usec pulse length 27 255-27 =228
 #define PREAMBLE  0                    // definitions for state machine
+#define SEPERATOR 1                    // definitions for state machine
+#define SENDBYTE  2                    // definitions for state machine
+#define MAXMSG  2
 
-
+int msgIndex = 0;
+int byteIndex = 0;
 bool second_isr = false;               // pulse up or down
 unsigned char last_timer = TIMER_SHORT; // store last timer value
 unsigned char flag = 0;                // used for short or long pulse
@@ -125,10 +129,6 @@ void assemble_dcc_msg()
   msg[1].data[0] = lokoadr;
   msg[1].data[1] = data;
   msg[1].data[2] = lokoadr ^ data;
-  //Serial.print(lokoadr);
-  //Serial.print("  ");
-  //Serial.print(data);
-  //Serial.println();
 
   interrupts();
 }
