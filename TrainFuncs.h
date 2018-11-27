@@ -1,9 +1,7 @@
-void setup() {
-  // put your setup code here, to run once:
 
+void assembleAndSendSpeed(unsigned char newSpeed) {
+  data = newSpeed;
+  assemble_dcc_msg();
+  delay(750);
 }
 
-void loop() {
-  // put your main code here, to run repeatedly:
-
-}
