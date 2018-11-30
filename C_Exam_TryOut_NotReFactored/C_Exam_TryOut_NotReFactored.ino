@@ -34,7 +34,7 @@ unsigned char outbyte = 0;
 unsigned char cbit = 0x80;
 unsigned char preample1;               // global variabel for preample part 1
 unsigned char preample2;               // global variabel for preample part 2
-unsigned char lokoadr = 40;            // global variabel adresse
+            // global variabel adresse
 unsigned char data = 96;               // global variabel kommando
 unsigned char layoutAddress = 0;      // global variabel layoutAdresse
 unsigned char accAddress = 0;
@@ -43,7 +43,6 @@ unsigned char signalSwitchDataByteTwo = 0;
 unsigned char regAddress;
 unsigned char currentSettingSignalOrSwitch = 0;
 unsigned char lastOrder = 0x80;
-unsigned char oldLokoAdr;
 int output = 3;
 int starttal = 3;
 
@@ -153,15 +152,14 @@ ISR(TIMER2_OVF_vect) //Timer2 overflow interrupt vector handler
   }
 }
 
-
-
-void assembleAndSendSpeed(unsigned char newSpeed) {
+// Function for setting the speed newSpeed of a specific train with address lokoAddr
+void assembleAndSendSpeed(unsigned char newSpeed, unsigned char lokoAddr) {
   data = newSpeed;
-  assemble_dcc_msg();
+  assemble_dcc_msg(lokoAddr);
   delay(750);
 }
 
-void assembleAndSendOrder(unsigned char trainFunction) {
+/* void assembleAndSendOrder(unsigned char trainFunction) {
 
   unsigned char newOrder;
 
@@ -177,12 +175,12 @@ void assembleAndSendOrder(unsigned char trainFunction) {
 
   data = newOrder;
   
-  assemble_dcc_msg();
+  assemble_dcc_msg(lokoadr);
 
   lastOrder = data;
 
   delay(750);
-}
+} */
 
 // Function for controlling the boolean value of a switch or a signal
 void assembleAndSendSignalSwitchBytes (unsigned char switchOrSignalAddress, int greenRedStraightTurnBoolean) {
@@ -198,11 +196,7 @@ void assembleAndSendSignalSwitchBytes (unsigned char switchOrSignalAddress, int 
 
   computeSignalSwitchDataByteOne(accAddress);
 
-  oldLokoAdr = lokoadr;
-
-  lokoadr = signalSwitchDataByteOne;
-
-  assemble_dcc_msg();
+  assemble_dcc_msg(signalSwitchDataByteOne);
 
   delay(30);
 
@@ -210,17 +204,17 @@ void assembleAndSendSignalSwitchBytes (unsigned char switchOrSignalAddress, int 
 
   data = signalSwitchDataByteTwo;
 
-  assemble_dcc_msg();
+  assemble_dcc_msg(signalSwitchDataByteOne);
 
-  //delay(750);
 
-  lokoadr = oldLokoAdr;
 }
 
 void computeSignalSwitchDataByteOne (unsigned char accAddress) {
   signalSwitchDataByteOne = accAddress + 128;
 }
 
+// TODO: ændring af regaddr virker ikke helt, så når vi eksempelvis vil skifte signal nr 152, fungerer det ikke.
+// Dette skal ordnes!
 void computeSignalSwitchDataByteTwo (unsigned char fifthBit, unsigned char eigthBit) {
   signalSwitchDataByteTwo = 240;
   if (fifthBit == 1) {
@@ -261,26 +255,27 @@ void setup()
   // put your setup code here, to run once:
   Serial.begin(115200);
   pinMode(DCC_PIN, OUTPUT); // enable styrepin som output på pin 6
-  assemble_dcc_msg();
+  assemble_dcc_msg(36);
   SetupTimer2();
 
 }
 
 void loop()
 {
-  
-  assembleAndSendSignalSwitchBytes (111, 0);
+
+  assembleAndSendSpeed(0x61, 07);
+  assembleAndSendSignalSwitchBytes (151, 1);
 
 }
 
 
 
-void assemble_dcc_msg()
+void assemble_dcc_msg(unsigned char lokoAddr)
 {
   noInterrupts();  // make sure that only "matching" parts of the message are used in ISR
-  msg[1].data[0] = lokoadr;
+  msg[1].data[0] = lokoAddr;
   msg[1].data[1] = data;
-  msg[1].data[2] = lokoadr ^ data;
+  msg[1].data[2] = lokoAddr ^ data;
   //Serial.print(lokoadr);
   //Serial.print("  ");
   //Serial.print(data);
