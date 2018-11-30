@@ -1,13 +1,8 @@
-#ifndef SignalsAndSwitches.h
-#define SignalsAndSwitches.h
+#ifndef SIGNALSANDSWITCHES_h
+#define SIGNALSANDSWITCHES_h
 
-void assembleAndSendSignalSwitchBytes (unsigned char thisLayoutAddress) {
-}
-
-void computeSignalSwitchDataByteOne (unsigned char accAddress) {
-}
-
-void computeSignalSwitchDataByteTwo (unsigned char fifthBit, unsigned char eigthBit) {
-}
+extern void assembleAndSendSignalSwitchBytes (unsigned char thisLayoutAddress,  unsigned char signalTurn);
+extern void computeSignalSwitchDataByteOne (unsigned char accAddress);
+extern void computeSignalSwitchDataByteTwo (unsigned char fifthBit, unsigned char eigthBit);
 
 #endif

@@ -1,4 +1,5 @@
-//#include arduino.h
+#include <arduino.h>
+#include "DataFuncs.h"
 
 #define DCC_PIN 6                      // DCC out
 #define TIMER_SHORT 0x8D               // 58usec pulse length 141 255-141=114
@@ -21,7 +22,7 @@ unsigned char preample1;               // global variabel for preample part 1
 unsigned char preample2;               // global variabel for preample part 2
 unsigned char lokoadr = 40;            // global variabel adresse
 unsigned char data = 96;               // global variabel kommando
-unsigned char layoutAddress = 102;      // global variabel layoutAdresse
+
 
 struct Message                         // buffer for command
 {
@@ -34,6 +35,8 @@ struct Message msg[MAXMSG] =
   { { 0xFF,     0, 0xFF, 0, 0, 0, 0}, 3},   // idle msg
   { { 0xFF,     0, 0xFF, 0, 0, 0, 0}, 3}    // message
 };
+
+void assemble_dcc_msg();
 
 // TCCR2A, TCCR2B, TIMSK2, TCNT2 as well as TIMER2_OVF_vect i ISR are all defined in the arduino,
 // and thus are not defined in this scope, but are accessed via arduino.h
@@ -122,6 +125,11 @@ ISR(TIMER2_OVF_vect) //Timer2 overflow interrupt vector handler
     }
   }
 }
+
+void setData(unsigned char incData) {
+  data = incData;
+}
+
 
 void assemble_dcc_msg()
 {

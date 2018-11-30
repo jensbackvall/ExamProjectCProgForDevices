@@ -1,12 +1,9 @@
-#ifndef TrainFuncs.h
-#define TrainFuncs.h
+#ifndef TRAINFUNCS_h
+#define TRAINFUNCS_h
 
 
-void assembleAndSendSpeed(unsigned char newSpeed) {
-}
+extern void assembleAndSendSpeed(unsigned char newSpeed);
 
-
-void assembleAndSendOrder(unsigned char trainFunction) {
-}
+extern void assembleAndSendOrder(unsigned char trainFunction);
 
 #endif

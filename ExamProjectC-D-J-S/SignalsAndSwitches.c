@@ -1,36 +1,16 @@
 #include "DataFuncs.h"
+#include "SignalsAndSwitches.h"
 
 unsigned char accAddress = 0;
 unsigned char signalSwitchDataByteOne = 0;
 unsigned char signalSwitchDataByteTwo = 0;
 unsigned char regAddress;
+unsigned char oldLokoAdr;
 
-void assembleAndSendSignalSwitchBytes (unsigned char thisLayoutAddress) {
-
-  unsigned char signalTurn = 0;
-
-  if (thisLayoutAddress == 102) {
-
-    if (currentDirection102 == 0) {
-      currentDirection102 = 1;
-    } else {
-      currentDirection102 = 0;
-    }
-
-    signalTurn = currentDirection102;
-  }
+unsigned char layoutAddress = 102;      // global variabel layoutAdresse
 
 
-  if (thisLayoutAddress == 101) {
-
-    if (currentDirection101 == 0) {
-      currentDirection101 = 1;
-    } else {
-      currentDirection101 = 0;
-    }
-
-    signalTurn = currentDirection101;
-  }
+void assembleAndSendSignalSwitchBytes (unsigned char thisLayoutAddress, unsigned char signalTurn) {
 
   layoutAddress = thisLayoutAddress;
 
@@ -38,11 +18,12 @@ void assembleAndSendSignalSwitchBytes (unsigned char thisLayoutAddress) {
 
   computeSignalSwitchDataByteTwo(1, signalTurn);
 
-  data = signalSwitchDataByteTwo;
+  //data = signalSwitchDataByteTwo;
+  setData(signalSwitchDataByteTwo);
 
   computeSignalSwitchDataByteOne(accAddress);
 
-  oldLokoAdr = lokoadr;
+1  oldLokoAdr = lokoadr;
 
   lokoadr = signalSwitchDataByteOne;
 
@@ -52,7 +33,8 @@ void assembleAndSendSignalSwitchBytes (unsigned char thisLayoutAddress) {
 
   computeSignalSwitchDataByteTwo(0, signalTurn);
 
-  data = signalSwitchDataByteTwo;
+  //data = signalSwitchDataByteTwo;
+  setData(signalSwitchDataByteTwo);
 
   assemble_dcc_msg();
 

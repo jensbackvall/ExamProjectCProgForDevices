@@ -1,9 +1,12 @@
 #include "DataFuncs.h"
+#include "TrainFuncs.h"
 
+unsigned char lastOrder = 0x80;
 
 
 void assembleAndSendSpeed(unsigned char newSpeed) {
-  data = newSpeed;
+  //data = newSpeed;
+  setData(newSpeed);
   assemble_dcc_msg();
   delay(750);
 }
@@ -23,12 +26,12 @@ void assembleAndSendOrder(unsigned char trainFunction) {
     return;
   }
 
-  data = newOrder;
+  //data = newOrder;
+  setData(newOrder);
 
   assemble_dcc_msg();
 
-  lastOrder = data;
+  lastOrder = newOrder;
 
   delay(750);
 }
-
