@@ -36,7 +36,14 @@ struct Message msg[MAXMSG] =
   { { 0xFF,     0, 0xFF, 0, 0, 0, 0}, 3}    // message
 };
 
-void assemble_dcc_msg();
+void assemble_dcc_msg()
+{
+  noInterrupts();  // make sure that only "matching" parts of the message are used in ISR
+  msg[1].data[0] = lokoadr;
+  msg[1].data[1] = data;
+  msg[1].data[2] = lokoadr ^ data;
+  interrupts();
+}
 
 // TCCR2A, TCCR2B, TIMSK2, TCNT2 as well as TIMER2_OVF_vect i ISR are all defined in the arduino,
 // and thus are not defined in this scope, but are accessed via arduino.h
