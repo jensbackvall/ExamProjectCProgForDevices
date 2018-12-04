@@ -46,6 +46,10 @@ unsigned char lastOrder = 0x80;
 int output = 3;
 int starttal = 3;
 
+long randNumber;
+int a[3];
+
+
 int const maxdata = 16;
 unsigned char arraydata[2][maxdata];
 int msgIndex = 0;
@@ -159,6 +163,12 @@ void assembleAndSendSpeed(unsigned char newSpeed, unsigned char lokoAddr) {
   delay(750);
 }
 
+void randomSpeed(unsigned char lokoAddr) {
+  randNumber = random(0, 3);
+  assembleAndSendSpeed(a[randNumber], lokoAddr);
+  Serial.println(a[randNumber]);   
+}
+
 /* void assembleAndSendOrder(unsigned char trainFunction) {
 
   unsigned char newOrder;
@@ -257,15 +267,32 @@ void setup()
   pinMode(DCC_PIN, OUTPUT); // enable styrepin som output på pin 6
   assemble_dcc_msg(36);
   SetupTimer2();
+  
+  randomSeed(analogRead(0));
+  
+  a[0] = 0x62;
+  a[1] = 0x69;
+  a[2] = 0x6F;
+
+  
 
 }
 
 void loop()
 {
 
-  assembleAndSendSpeed(0x61, 07);
-  assembleAndSendSignalSwitchBytes (151, 1);
-
+  assembleAndSendSpeed(0x60, 07);
+  
+  /*randomSpeed(07);
+  delay(5000);
+  assembleAndSendSignalSwitchBytes(101, 1);
+  delay(5000);
+  assembleAndSendSignalSwitchBytes(101, 0);
+  delay(5000);
+  assembleAndSendSignalSwitchBytes(102, 1);
+  delay(5000);
+  assembleAndSendSignalSwitchBytes(102, 0);
+  delay(5000);*/
 }
 
 
