@@ -51,7 +51,10 @@ int a[3];
 
 int outerTrackSignals[] = {152, 142, 141, 122, 121, 131, 132, 151};
 int innerTrackSignals[] = {112, 102, 101, 82, 81, 91, 92, 111};
+int outerTwoTracksSwitches[] = {252, 244, 250, 242, 249, 241, 251, 243};
 
+
+bool startUpSignalsAndSwitches = false;
 
 int const maxdata = 16;
 unsigned char arraydata[2][maxdata];
@@ -298,6 +301,46 @@ void computeSignalSwitchDataByteTwo (unsigned char fifthBit, unsigned char eigth
   }
 }
 
+void startUpSignalsAndSwitchesFunction() {
+  for (int switchAddress: outerTwoTracksSwitches) {
+      assembleAndSendSignalSwitchBytes(switchAddress, 0);
+  }
+  for (int signalAddress: outerTrackSignals) {
+      assembleAndSendSignalSwitchBytes(signalAddress, 0);
+  }
+  for (int signalAddress: innerTrackSignals) {
+      assembleAndSendSignalSwitchBytes(signalAddress, 0);
+  }
+
+  for(int i = 0; i < 8; i++) {
+      assembleAndSendSignalSwitchBytes(outerTrackSignals[i], 1);
+      assembleAndSendSignalSwitchBytes(innerTrackSignals[i], 1);
+      delay(500);
+      if (i > 0) {
+        assembleAndSendSignalSwitchBytes(outerTrackSignals[i - 1], 0);
+        assembleAndSendSignalSwitchBytes(innerTrackSignals[i - 1], 0);
+      }
+  }
+  
+  for (int signalAddress: outerTrackSignals) {
+      assembleAndSendSignalSwitchBytes(signalAddress, 1);
+  }
+  for (int signalAddress: innerTrackSignals) {
+      assembleAndSendSignalSwitchBytes(signalAddress, 1);
+  }
+    for (int switchAddress: outerTwoTracksSwitches) {
+      assembleAndSendSignalSwitchBytes(switchAddress, 1);
+  }
+
+}
+
+void rideTwoTrainsIntoTheHorizon(int loko1, int loko2){
+  Serial.println("Random værdier for loko1");
+  randomSpeed(loko1);
+  Serial.println("Random værdier for loko2");
+  randomSpeed(loko2);
+}
+
 
 
 void setup()
@@ -320,11 +363,12 @@ void setup()
 
 void loop()
 {
+  if (startUpSignalsAndSwitches == false) {
+    startUpSignalsAndSwitchesFunction();
+    startUpSignalsAndSwitches = true;
+  }
 
-  //assembleAndSendSpeed(0x60, 07);
-  
-  //randomSpeed(07); delay(5000);
-  assembleAndSendSignalSwitchBytes(152, 0);
+  rideTwoTrainsIntoTheHorizon(40, 8);
   
 }
 
