@@ -41,11 +41,21 @@ unsigned char layoutAddress = 0;      // global variabel layoutAdresse
 unsigned char accAddress = 0;
 unsigned char signalSwitchDataByteOne = 0;
 unsigned char signalSwitchDataByteTwo = 0;
-unsigned char regAddress;
+int regAddress;
 unsigned char currentSettingSignalOrSwitch = 0;
 unsigned char lastOrder = 0x80;
 int output = 3;
 int starttal = 3;
+
+long randNumber;
+int a[3];
+
+int outerTrackSignals[] = {152, 142, 141, 122, 121, 131, 132, 151};
+int innerTrackSignals[] = {112, 102, 101, 82, 81, 91, 92, 111};
+int outerTwoTracksSwitches[] = {252, 244, 250, 242, 249, 241, 251, 243};
+
+
+bool startUpSignalsAndSwitches = false;
 
 int const maxdata = 16;
 unsigned char arraydata[2][maxdata];
@@ -181,19 +191,49 @@ void assembleAndSendSpeed(unsigned char newSpeed, unsigned char lokoAddr) {
   delay(750);
 } */
 
+
+
+
+
 // Function for controlling the boolean value of a switch or a signal
 void assembleAndSendSignalSwitchBytes (unsigned char switchOrSignalAddress, int greenRedStraightTurnBoolean) {
 
   // Set the layoutaddress to the address of the signal or switch to be controlled
   layoutAddress = switchOrSignalAddress;
+  Serial.println("LAYOUTADDRESS");
+  Serial.println(layoutAddress);
+
+  accAddress = ((layoutAddress / 4) + 1) & 63;
+
+  regAddress = ((layoutAddress % 4) - 1);
+  Serial.println("REGADDRESS:");
+  Serial.println(regAddress);
+
+  if (regAddress < 0) {
+    regAddress = 3;
+    Serial.println("regAddress lige sat til 3");
+    Serial.println(regAddress);
+    accAddress = accAddress - 1;
+  }
+
+  signalSwitchDataByteOne = accAddress + 128;
+  Serial.println("regAddress should still be 3");
+  Serial.println(regAddress);
+  //assemble_dcc_msg(signalSwitchDataByteOne);
+
+  delay(30);
 
   computeSignalSwitchDataByteTwo(1, greenRedStraightTurnBoolean);
 
+  Serial.println("regAddress should STILL be 3");
+  Serial.println(regAddress);
+
   data = signalSwitchDataByteTwo;
 
-  computeSignalSwitchDataByteOne(accAddress);
-
   assemble_dcc_msg(signalSwitchDataByteOne);
+  Serial.println("First assembly");
+  Serial.println(accAddress);
+  Serial.println(regAddress);
 
   delay(30);
 
@@ -202,13 +242,16 @@ void assembleAndSendSignalSwitchBytes (unsigned char switchOrSignalAddress, int 
   data = signalSwitchDataByteTwo;
 
   assemble_dcc_msg(signalSwitchDataByteOne);
+  Serial.println("Second assembly");
+  Serial.println(accAddress);
+  Serial.println(regAddress);
 
 
 }
 
-void computeSignalSwitchDataByteOne (unsigned char accAddress) {
-  signalSwitchDataByteOne = accAddress + 128;
-}
+//void computeSignalSwitchDataByteOne (unsigned char accAddress) {
+//  signalSwitchDataByteOne = accAddress + 128;
+//}
 
 // TODO: ændring af regaddr virker ikke helt, så når vi eksempelvis vil skifte signal nr 152, fungerer det ikke.
 // Dette skal ordnes!
@@ -219,14 +262,20 @@ void computeSignalSwitchDataByteTwo (unsigned char fifthBit, unsigned char eigth
   } else {
     signalSwitchDataByteTwo = signalSwitchDataByteTwo + 0;
   }
-  accAddress = ((layoutAddress / 4) + 1) & 63;
-  regAddress = (layoutAddress % 4) - 1;
+
+  //regAddress = (layoutAddress % 4) - 1;
+
+  //if(accAddress % 4 != 0) {
+  //  regAddress = (layoutAddress % 4) - 1;
+  //} else {
+  //  regAddress = 3;
+  //}
 
 
-  if (regAddress < 0) {
-    regAddress = 3;
-    accAddress = accAddress - 1;
-  }
+  //if (regAddress < 0) {
+    //regAddress = 3;
+    //accAddress = accAddress - 1;
+  //}
 
   if (regAddress == 3) {
     signalSwitchDataByteTwo = signalSwitchDataByteTwo ^ 6;
@@ -243,6 +292,46 @@ void computeSignalSwitchDataByteTwo (unsigned char fifthBit, unsigned char eigth
   } else {
     signalSwitchDataByteTwo = signalSwitchDataByteTwo ^ 0;
   }
+}
+
+void startUpSignalsAndSwitchesFunction() {
+  for (int switchAddress: outerTwoTracksSwitches) {
+      assembleAndSendSignalSwitchBytes(switchAddress, 0);
+  }
+  for (int signalAddress: outerTrackSignals) {
+      assembleAndSendSignalSwitchBytes(signalAddress, 0);
+  }
+  for (int signalAddress: innerTrackSignals) {
+      assembleAndSendSignalSwitchBytes(signalAddress, 0);
+  }
+
+  for(int i = 0; i < 8; i++) {
+      assembleAndSendSignalSwitchBytes(outerTrackSignals[i], 1);
+      assembleAndSendSignalSwitchBytes(innerTrackSignals[i], 1);
+      delay(500);
+      if (i > 0) {
+        assembleAndSendSignalSwitchBytes(outerTrackSignals[i - 1], 0);
+        assembleAndSendSignalSwitchBytes(innerTrackSignals[i - 1], 0);
+      }
+  }
+  
+  for (int signalAddress: outerTrackSignals) {
+      assembleAndSendSignalSwitchBytes(signalAddress, 1);
+  }
+  for (int signalAddress: innerTrackSignals) {
+      assembleAndSendSignalSwitchBytes(signalAddress, 1);
+  }
+    for (int switchAddress: outerTwoTracksSwitches) {
+      assembleAndSendSignalSwitchBytes(switchAddress, 1);
+  }
+
+}
+
+void rideTwoTrainsIntoTheHorizon(int loko1, int loko2){
+  Serial.println("Random værdier for loko1");
+  randomSpeed(loko1);
+  Serial.println("Random værdier for loko2");
+  randomSpeed(loko2);
 }
 
 
@@ -262,6 +351,13 @@ void loop()
   //assembleAndSendSpeed(0X6F,40);
   //assembleAndSendSignalSwitchBytes (151, 0);
   int l = distance(trigPin,echoPin);
+  if (startUpSignalsAndSwitches == false) {
+    startUpSignalsAndSwitchesFunction();
+    startUpSignalsAndSwitches = true;
+  }
+
+  rideTwoTrainsIntoTheHorizon(40, 8);
+  
 }
 
 
