@@ -23,7 +23,7 @@ void assembleAndSendSignalSwitchBytes (unsigned char thisLayoutAddress, unsigned
 
   computeSignalSwitchDataByteOne(accAddress);
 
-1  oldLokoAdr = lokoadr;
+  oldLokoAdr = lokoadr;
 
   lokoadr = signalSwitchDataByteOne;
 
