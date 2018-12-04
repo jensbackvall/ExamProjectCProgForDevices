@@ -6,6 +6,7 @@
    Der sendes kontinuerligt frames det er op til dig at sørge for korrekt lokoadr og data.
 
 */
+#include "Ultralyd.h"
 
 #define DCC_PIN  6                     // DCC out
 #define soundPin 2
@@ -46,15 +47,10 @@ unsigned char lastOrder = 0x80;
 int output = 3;
 int starttal = 3;
 
-long randNumber;
-int a[3];
-
-
 int const maxdata = 16;
 unsigned char arraydata[2][maxdata];
 int msgIndex = 0;
 int byteIndex = 0;
-long distance;
 
 
 struct Message                         // buffer for command
@@ -155,18 +151,11 @@ ISR(TIMER2_OVF_vect) //Timer2 overflow interrupt vector handler
     }
   }
 }
-
 // Function for setting the speed newSpeed of a specific train with address lokoAddr
 void assembleAndSendSpeed(unsigned char newSpeed, unsigned char lokoAddr) {
   data = newSpeed;
   assemble_dcc_msg(lokoAddr);
   delay(750);
-}
-
-void randomSpeed(unsigned char lokoAddr) {
-  randNumber = random(0, 3);
-  assembleAndSendSpeed(a[randNumber], lokoAddr);
-  Serial.println(a[randNumber]);   
 }
 
 /* void assembleAndSendOrder(unsigned char trainFunction) {
@@ -197,8 +186,6 @@ void assembleAndSendSignalSwitchBytes (unsigned char switchOrSignalAddress, int 
 
   // Set the layoutaddress to the address of the signal or switch to be controlled
   layoutAddress = switchOrSignalAddress;
-  
-  accAddress = ((layoutAddress / 4) + 1) & 63;
 
   computeSignalSwitchDataByteTwo(1, greenRedStraightTurnBoolean);
 
@@ -232,7 +219,7 @@ void computeSignalSwitchDataByteTwo (unsigned char fifthBit, unsigned char eigth
   } else {
     signalSwitchDataByteTwo = signalSwitchDataByteTwo + 0;
   }
-
+  accAddress = ((layoutAddress / 4) + 1) & 63;
   regAddress = (layoutAddress % 4) - 1;
 
 
@@ -267,32 +254,14 @@ void setup()
   pinMode(DCC_PIN, OUTPUT); // enable styrepin som output på pin 6
   assemble_dcc_msg(36);
   SetupTimer2();
-  
-  randomSeed(analogRead(0));
-  
-  a[0] = 0x62;
-  a[1] = 0x69;
-  a[2] = 0x6F;
-
-  
 
 }
 
 void loop()
 {
-
-  assembleAndSendSpeed(0x60, 07);
-  
-  /*randomSpeed(07);
-  delay(5000);
-  assembleAndSendSignalSwitchBytes(101, 1);
-  delay(5000);
-  assembleAndSendSignalSwitchBytes(101, 0);
-  delay(5000);
-  assembleAndSendSignalSwitchBytes(102, 1);
-  delay(5000);
-  assembleAndSendSignalSwitchBytes(102, 0);
-  delay(5000);*/
+  //assembleAndSendSpeed(0X6F,40);
+  //assembleAndSendSignalSwitchBytes (151, 0);
+  int l = distance(trigPin,echoPin);
 }
 
 

@@ -1,6 +1,6 @@
-#ifndef Ultralyd.h
-#define Ultralyd.h
+#ifndef ULTRA_LYD
+#define ULTRA_LYD
 
-extern int distance(int,int);
+int distance(int,int);
 
 #endif

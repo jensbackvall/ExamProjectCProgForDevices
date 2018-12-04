@@ -1,5 +1,5 @@
 #include "Ultralyd.h"
-
+#include <arduino.h>
 
 
 // Function for getting the ultrasound distance
@@ -11,8 +11,12 @@ int distance(int trigPin,int echoPin) {
   digitalWrite(trigPin, HIGH);
   delayMicroseconds(10);
   digitalWrite(trigPin, LOW);
+  // defines variables
+  long duration;
+  int distanceR;
   // Reads the echoPin, returns the sound wave travel time in microseconds
-  duration = pulseIn(echoPin, HIGH);
+  duration = pulseIn(echoPin, HIGH, 1000);
   // Calculating the distance
-  distance= duration*0.034/2;
+  distanceR= duration*0.034/2;
+  return distanceR;
 }
