@@ -40,7 +40,7 @@ unsigned char layoutAddress = 0;      // global variabel layoutAdresse
 unsigned char accAddress = 0;
 unsigned char signalSwitchDataByteOne = 0;
 unsigned char signalSwitchDataByteTwo = 0;
-unsigned char regAddress;
+int regAddress;
 unsigned char currentSettingSignalOrSwitch = 0;
 unsigned char lastOrder = 0x80;
 int output = 3;
@@ -48,6 +48,9 @@ int starttal = 3;
 
 long randNumber;
 int a[3];
+
+int outerTrackSignals[] = {152, 142, 141, 122, 121, 131, 132, 151};
+int innerTrackSignals[] = {112, 102, 101, 82, 81, 91, 92, 111};
 
 
 int const maxdata = 16;
@@ -192,21 +195,49 @@ void randomSpeed(unsigned char lokoAddr) {
   delay(750);
 } */
 
+
+
+
+
 // Function for controlling the boolean value of a switch or a signal
 void assembleAndSendSignalSwitchBytes (unsigned char switchOrSignalAddress, int greenRedStraightTurnBoolean) {
 
   // Set the layoutaddress to the address of the signal or switch to be controlled
   layoutAddress = switchOrSignalAddress;
-  
+  Serial.println("LAYOUTADDRESS");
+  Serial.println(layoutAddress);
+
   accAddress = ((layoutAddress / 4) + 1) & 63;
+
+  regAddress = ((layoutAddress % 4) - 1);
+  Serial.println("REGADDRESS:");
+  Serial.println(regAddress);
+
+  if (regAddress < 0) {
+    regAddress = 3;
+    Serial.println("regAddress lige sat til 3");
+    Serial.println(regAddress);
+    accAddress = accAddress - 1;
+  }
+
+  signalSwitchDataByteOne = accAddress + 128;
+  Serial.println("regAddress should still be 3");
+  Serial.println(regAddress);
+  //assemble_dcc_msg(signalSwitchDataByteOne);
+
+  delay(30);
 
   computeSignalSwitchDataByteTwo(1, greenRedStraightTurnBoolean);
 
+  Serial.println("regAddress should STILL be 3");
+  Serial.println(regAddress);
+
   data = signalSwitchDataByteTwo;
 
-  computeSignalSwitchDataByteOne(accAddress);
-
   assemble_dcc_msg(signalSwitchDataByteOne);
+  Serial.println("First assembly");
+  Serial.println(accAddress);
+  Serial.println(regAddress);
 
   delay(30);
 
@@ -215,13 +246,16 @@ void assembleAndSendSignalSwitchBytes (unsigned char switchOrSignalAddress, int 
   data = signalSwitchDataByteTwo;
 
   assemble_dcc_msg(signalSwitchDataByteOne);
+  Serial.println("Second assembly");
+  Serial.println(accAddress);
+  Serial.println(regAddress);
 
 
 }
 
-void computeSignalSwitchDataByteOne (unsigned char accAddress) {
-  signalSwitchDataByteOne = accAddress + 128;
-}
+//void computeSignalSwitchDataByteOne (unsigned char accAddress) {
+//  signalSwitchDataByteOne = accAddress + 128;
+//}
 
 // TODO: ændring af regaddr virker ikke helt, så når vi eksempelvis vil skifte signal nr 152, fungerer det ikke.
 // Dette skal ordnes!
@@ -233,13 +267,19 @@ void computeSignalSwitchDataByteTwo (unsigned char fifthBit, unsigned char eigth
     signalSwitchDataByteTwo = signalSwitchDataByteTwo + 0;
   }
 
-  regAddress = (layoutAddress % 4) - 1;
+  //regAddress = (layoutAddress % 4) - 1;
+
+  //if(accAddress % 4 != 0) {
+  //  regAddress = (layoutAddress % 4) - 1;
+  //} else {
+  //  regAddress = 3;
+  //}
 
 
-  if (regAddress < 0) {
-    regAddress = 3;
-    accAddress = accAddress - 1;
-  }
+  //if (regAddress < 0) {
+    //regAddress = 3;
+    //accAddress = accAddress - 1;
+  //}
 
   if (regAddress == 3) {
     signalSwitchDataByteTwo = signalSwitchDataByteTwo ^ 6;
@@ -281,18 +321,11 @@ void setup()
 void loop()
 {
 
-  assembleAndSendSpeed(0x60, 07);
+  //assembleAndSendSpeed(0x60, 07);
   
-  /*randomSpeed(07);
-  delay(5000);
-  assembleAndSendSignalSwitchBytes(101, 1);
-  delay(5000);
-  assembleAndSendSignalSwitchBytes(101, 0);
-  delay(5000);
-  assembleAndSendSignalSwitchBytes(102, 1);
-  delay(5000);
-  assembleAndSendSignalSwitchBytes(102, 0);
-  delay(5000);*/
+  //randomSpeed(07); delay(5000);
+  assembleAndSendSignalSwitchBytes(152, 0);
+  
 }
 
 
