@@ -17,8 +17,8 @@
 #define SEPERATOR 1                    // definitions for state machine
 #define SENDBYTE  2                    // definitions for state machine
 #define MAXMSG  2
-#define trigPin 12
-#define echoPin 13
+#define trigPin 9
+#define echoPin 10
 
 int analogin = A0;
 int sensorValue = 0;
@@ -165,7 +165,7 @@ ISR(TIMER2_OVF_vect) //Timer2 overflow interrupt vector handler
 void assembleAndSendSpeed(unsigned char newSpeed, unsigned char lokoAddr) {
   data = newSpeed;
   assemble_dcc_msg(lokoAddr);
-  delay(750);
+  delay(10);
 }
 
 /* void assembleAndSendOrder(unsigned char trainFunction) {
@@ -190,15 +190,6 @@ void assembleAndSendSpeed(unsigned char newSpeed, unsigned char lokoAddr) {
 
   delay(750);
 } */
-
-void randomSpeed(unsigned char lokoAddr) {
-
-  randNumber = random(0, 3);
-  assembleAndSendSpeed(a[randNumber], lokoAddr);
-  delay(2000);
-  Serial.println(a[randNumber]);
- 
-}
 
 
 
@@ -334,6 +325,13 @@ void startUpSignalsAndSwitchesFunction() {
 
 }
 
+void randomSpeed(unsigned char lokoAddr) {
+  randNumber = random(0, 3);
+  assembleAndSendSpeed(a[randNumber], lokoAddr);
+  delay(2000);
+  Serial.println(a[randNumber]);
+}
+
 void rideTwoTrainsIntoTheHorizon(int loko1, int loko2){
   Serial.println("Random værdier for loko1");
   randomSpeed(loko1);
@@ -347,23 +345,40 @@ void setup()
 {
   // put your setup code here, to run once:
   Serial.begin(115200);
-  pinMode(DCC_PIN, OUTPUT); // enable styrepin som output på pin 6
-  assemble_dcc_msg(36);
+  pinMode(DCC_PIN, OUTPUT);
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  // enable styrepin som output på pin 6
   SetupTimer2();
+  
+  randomSeed(analogRead(0));
 
 }
 
 void loop()
 {
-  //assembleAndSendSpeed(0X6F,40);
-  //assembleAndSendSignalSwitchBytes (151, 0);
+  //rideTwoTrainsIntoTheHorizon(40, 8);
+  assembleAndSendSpeed(0x61, 40);
+  assembleAndSendSpeed(0x61, 8);
+  //randomSpeed(40);
+  //randomSpeed(8);
   int l = distance(trigPin,echoPin);
-  if (startUpSignalsAndSwitches == false) {
+  Serial.println(l);
+  if (l < 5) {
+        Serial.println("TRAIN ON OUTER TRACK");
+        delay(500);
+  } else if (l > 9 && l < 14) {
+        Serial.println("TRAIN ON INNER TRACK");
+        delay(500);
+  } else {
+        Serial.println("NO TRAIN RIGHT NOW");
+  }
+  /*if (startUpSignalsAndSwitches == false) {
     startUpSignalsAndSwitchesFunction();
     startUpSignalsAndSwitches = true;
-  }
+  }*/
 
-  rideTwoTrainsIntoTheHorizon(40, 8);
+  
   
 }
 
