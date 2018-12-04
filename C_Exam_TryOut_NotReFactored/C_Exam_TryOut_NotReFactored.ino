@@ -191,7 +191,14 @@ void assembleAndSendSpeed(unsigned char newSpeed, unsigned char lokoAddr) {
   delay(750);
 } */
 
+void randomSpeed(unsigned char lokoAddr) {
 
+  randNumber = random(0, 3);
+  assembleAndSendSpeed(a[randNumber], lokoAddr);
+  delay(2000);
+  Serial.println(a[randNumber]);
+ 
+}
 
 
 
