@@ -261,20 +261,6 @@ void computeSignalSwitchDataByteTwo (unsigned char fifthBit, unsigned char eigth
     signalSwitchDataByteTwo = signalSwitchDataByteTwo + 0;
   }
 
-  //regAddress = (layoutAddress % 4) - 1;
-
-  //if(accAddress % 4 != 0) {
-  //  regAddress = (layoutAddress % 4) - 1;
-  //} else {
-  //  regAddress = 3;
-  //}
-
-
-  //if (regAddress < 0) {
-    //regAddress = 3;
-    //accAddress = accAddress - 1;
-  //}
-
   if (regAddress == 3) {
     signalSwitchDataByteTwo = signalSwitchDataByteTwo ^ 6;
   } else if (regAddress == 2) {
