@@ -24,6 +24,7 @@ int analogin = A0;
 int sensorValue = 0;
 int outputValue = 0;
 int speedValue = 0X60;
+int lastL = 0;
 
 
 bool second_isr = false;               // pulse up or down
@@ -37,8 +38,8 @@ unsigned char preample1;               // global variabel for preample part 1
 unsigned char preample2;               // global variabel for preample part 2
             // global variabel adresse
 unsigned char data = 96;               // global variabel kommando
-unsigned char layoutAddress = 0;      // global variabel layoutAdresse
-unsigned char accAddress = 0;
+int layoutAddress = 0;      // global variabel layoutAdresse
+int accAddress = 0;
 unsigned char signalSwitchDataByteOne = 0;
 unsigned char signalSwitchDataByteTwo = 0;
 int regAddress;
@@ -52,8 +53,9 @@ int a[3];
 
 int outerTrackSignals[] = {152, 142, 141, 122, 121, 131, 132, 151};
 int innerTrackSignals[] = {112, 102, 101, 82, 81, 91, 92, 111};
+int allSignals[] = {152, 142, 141, 122, 121, 131, 132, 151,112, 102, 101, 82, 81, 91, 92, 111, 31, 42, 41, 32, 11, 12, 52, 61, 21, 22, 51, 62};
 int outerTwoTracksSwitches[] = {252, 244, 250, 242, 249, 241, 251, 243};
-
+int innerTracksSwitches[] = {244,242,241,243};
 
 bool startUpSignalsAndSwitches = false;
 
@@ -165,7 +167,7 @@ ISR(TIMER2_OVF_vect) //Timer2 overflow interrupt vector handler
 void assembleAndSendSpeed(unsigned char newSpeed, unsigned char lokoAddr) {
   data = newSpeed;
   assemble_dcc_msg(lokoAddr);
-  delay(10);
+  delay(50);
 }
 
 /* void assembleAndSendOrder(unsigned char trainFunction) {
@@ -194,44 +196,30 @@ void assembleAndSendSpeed(unsigned char newSpeed, unsigned char lokoAddr) {
 
 
 // Function for controlling the boolean value of a switch or a signal
-void assembleAndSendSignalSwitchBytes (unsigned char switchOrSignalAddress, int greenRedStraightTurnBoolean) {
+void assembleAndSendSignalSwitchBytes (int switchOrSignalAddress, int greenRedStraightTurnBoolean) {
 
   // Set the layoutaddress to the address of the signal or switch to be controlled
   layoutAddress = switchOrSignalAddress;
-  Serial.println("LAYOUTADDRESS");
-  Serial.println(layoutAddress);
 
   accAddress = ((layoutAddress / 4) + 1) & 63;
-
+  Serial.println(accAddress);
   regAddress = ((layoutAddress % 4) - 1);
-  Serial.println("REGADDRESS:");
-  Serial.println(regAddress);
 
   if (regAddress < 0) {
     regAddress = 3;
-    Serial.println("regAddress lige sat til 3");
-    Serial.println(regAddress);
     accAddress = accAddress - 1;
   }
 
   signalSwitchDataByteOne = accAddress + 128;
-  Serial.println("regAddress should still be 3");
-  Serial.println(regAddress);
   //assemble_dcc_msg(signalSwitchDataByteOne);
-
+  Serial.println(accAddress);
   delay(30);
 
   computeSignalSwitchDataByteTwo(1, greenRedStraightTurnBoolean);
 
-  Serial.println("regAddress should STILL be 3");
-  Serial.println(regAddress);
-
   data = signalSwitchDataByteTwo;
 
   assemble_dcc_msg(signalSwitchDataByteOne);
-  Serial.println("First assembly");
-  Serial.println(accAddress);
-  Serial.println(regAddress);
 
   delay(30);
 
@@ -240,10 +228,6 @@ void assembleAndSendSignalSwitchBytes (unsigned char switchOrSignalAddress, int 
   data = signalSwitchDataByteTwo;
 
   assemble_dcc_msg(signalSwitchDataByteOne);
-  Serial.println("Second assembly");
-  Serial.println(accAddress);
-  Serial.println(regAddress);
-
 
 }
 
@@ -299,13 +283,10 @@ void startUpSignalsAndSwitchesFunction() {
       }
   }
   
-  for (int signalAddress: outerTrackSignals) {
+  for (int signalAddress: allSignals) {
       assembleAndSendSignalSwitchBytes(signalAddress, 1);
   }
-  for (int signalAddress: innerTrackSignals) {
-      assembleAndSendSignalSwitchBytes(signalAddress, 1);
-  }
-    for (int switchAddress: outerTwoTracksSwitches) {
+  for (int switchAddress: outerTwoTracksSwitches) {
       assembleAndSendSignalSwitchBytes(switchAddress, 1);
   }
 
@@ -336,6 +317,20 @@ void setup()
   pinMode(echoPin, INPUT);
   // enable styrepin som output på pin 6
   SetupTimer2();
+  assembleAndSendSpeed(0x61, 40);
+  assembleAndSendSpeed(0x61, 8);
+  startUpSignalsAndSwitchesFunction();
+  assembleAndSendSignalSwitchBytes(231, 1);
+  assembleAndSendSignalSwitchBytes(232, 0);
+
+  assembleAndSendSignalSwitchBytes(233, 0);
+  assembleAndSendSignalSwitchBytes(234, 1);
+
+  assembleAndSendSignalSwitchBytes(241, 1);
+  assembleAndSendSignalSwitchBytes(249, 0);
+
+  //assembleAndSendSignalSwitchBytes(252, 0);
+  //assembleAndSendSignalSwitchBytes(241, 0);
   
   randomSeed(analogRead(0));
 
@@ -344,28 +339,88 @@ void setup()
 void loop()
 {
   //rideTwoTrainsIntoTheHorizon(40, 8);
-  assembleAndSendSpeed(0x61, 40);
-  assembleAndSendSpeed(0x61, 8);
+  assembleAndSendSpeed(0x6F, 40);
+  assembleAndSendSpeed(0x4F, 8);
   //randomSpeed(40);
   //randomSpeed(8);
   int l = distance(trigPin,echoPin);
   Serial.println(l);
-  if (l < 5) {
+  if (l < 5 && lastL < 5) {
         Serial.println("TRAIN ON OUTER TRACK");
-        delay(500);
-  } else if (l > 9 && l < 14) {
+        trainPassed(false);
+  } else if (l > 9 && l < 16 && lastL > 9 && lastL < 16) {
         Serial.println("TRAIN ON INNER TRACK");
-        delay(500);
+        trainPassed(true);
   } else {
         Serial.println("NO TRAIN RIGHT NOW");
   }
-  /*if (startUpSignalsAndSwitches == false) {
-    startUpSignalsAndSwitchesFunction();
-    startUpSignalsAndSwitches = true;
-  }*/
+  lastL = l;
+  
+}
 
-  
-  
+void trainPassed(bool innerTrain){
+  for (int signalAddress: outerTrackSignals) {
+      assembleAndSendSignalSwitchBytes(signalAddress, 0);
+  }
+  for (int signalAddress: innerTrackSignals) {
+      assembleAndSendSignalSwitchBytes(signalAddress, 0);
+  }
+  if (innerTrain){
+    for (int signalAddress: innerTracksSwitches) {
+      assembleAndSendSignalSwitchBytes(signalAddress, 0);
+    }
+    for (int signalAddress: innerTrackSignals) {
+      assembleAndSendSignalSwitchBytes(signalAddress, 1);
+    }
+  }else{
+    for (int switchAddress: outerTwoTracksSwitches) {
+      assembleAndSendSignalSwitchBytes(switchAddress, 0);
+    }
+    for (int signalAddress: outerTrackSignals) {
+      assembleAndSendSignalSwitchBytes(signalAddress, 1);
+    }
+  }
+  Serial.println("Delay starter");
+  delay(20000);
+  Serial.println("Delay slutter");
+  bool passed = false;
+  lastL = 0;
+  while (passed == false){
+    int l = distance(trigPin,echoPin);
+    Serial.println(l);
+    if (l < 5 && lastL <5) {
+        Serial.println("TRAIN ON OUTER TRACK");
+        passed = true;
+    } else if (l > 9 && l < 16 && lastL > 9 && lastL < 16) {
+          Serial.println("TRAIN ON INNER TRACK");
+          passed = true;
+    } else {
+          Serial.println("NO TRAIN RIGHT NOW");
+    }
+    lastL = l;
+  }
+  if (innerTrain){
+    for (int signalAddress: innerTrackSignals) {
+      assembleAndSendSignalSwitchBytes(signalAddress, 0);
+    }
+    for (int signalAddress: innerTracksSwitches) {
+      assembleAndSendSignalSwitchBytes(signalAddress, 1);
+    }
+  }else{
+    for (int signalAddress: outerTrackSignals) {
+      assembleAndSendSignalSwitchBytes(signalAddress, 0);
+    }
+    for (int switchAddress: outerTwoTracksSwitches) {
+      assembleAndSendSignalSwitchBytes(switchAddress, 1);
+    }
+  }
+  for (int signalAddress: outerTrackSignals) {
+      assembleAndSendSignalSwitchBytes(signalAddress, 1);
+  }
+  for (int signalAddress: innerTrackSignals) {
+      assembleAndSendSignalSwitchBytes(signalAddress, 1);
+  }
+  delay(5000);
 }
 
 
