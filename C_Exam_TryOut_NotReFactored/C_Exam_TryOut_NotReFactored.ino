@@ -25,6 +25,7 @@ int sensorValue = 0;
 int outputValue = 0;
 int speedValue = 0X60;
 int lastL = 0;
+long timeMillis = 0;
 
 
 bool second_isr = false;               // pulse up or down
@@ -38,7 +39,7 @@ unsigned char preample1;               // global variabel for preample part 1
 unsigned char preample2;               // global variabel for preample part 2
             // global variabel adresse
 unsigned char data = 96;               // global variabel kommando
-int layoutAddress = 0;      // global variabel layoutAdresse
+unsigned char layoutAddress = 0;      // global variabel layoutAdresse
 int accAddress = 0;
 unsigned char signalSwitchDataByteOne = 0;
 unsigned char signalSwitchDataByteTwo = 0;
@@ -49,13 +50,14 @@ int output = 3;
 int starttal = 3;
 
 long randNumber;
-int a[3];
+int a[3] = {0x62, 0x69, 0x6F};
 
 int outerTrackSignals[] = {152, 142, 141, 122, 121, 131, 132, 151};
 int innerTrackSignals[] = {112, 102, 101, 82, 81, 91, 92, 111};
 int allSignals[] = {152, 142, 141, 122, 121, 131, 132, 151,112, 102, 101, 82, 81, 91, 92, 111, 31, 42, 41, 32, 11, 12, 52, 61, 21, 22, 51, 62};
 int outerTwoTracksSwitches[] = {252, 244, 250, 242, 249, 241, 251, 243};
 int innerTracksSwitches[] = {244,242,241,243};
+int outerTracksSwitches[] = {252,250,249,251};
 
 bool startUpSignalsAndSwitches = false;
 
@@ -197,22 +199,22 @@ void assembleAndSendSpeed(unsigned char newSpeed, unsigned char lokoAddr) {
 
 // Function for controlling the boolean value of a switch or a signal
 void assembleAndSendSignalSwitchBytes (int switchOrSignalAddress, int greenRedStraightTurnBoolean) {
-
   // Set the layoutaddress to the address of the signal or switch to be controlled
   layoutAddress = switchOrSignalAddress;
-
-  accAddress = ((layoutAddress / 4) + 1) & 63;
-  Serial.println(accAddress);
+ 
+  accAddress = layoutAddress / 4 + 1;
   regAddress = ((layoutAddress % 4) - 1);
 
   if (regAddress < 0) {
     regAddress = 3;
     accAddress = accAddress - 1;
   }
+  
+  accAddress = accAddress & 63;
 
   signalSwitchDataByteOne = accAddress + 128;
   //assemble_dcc_msg(signalSwitchDataByteOne);
-  Serial.println(accAddress);
+  
   delay(30);
 
   computeSignalSwitchDataByteTwo(1, greenRedStraightTurnBoolean);
@@ -295,15 +297,17 @@ void startUpSignalsAndSwitchesFunction() {
 void randomSpeed(unsigned char lokoAddr) {
   randNumber = random(0, 3);
   assembleAndSendSpeed(a[randNumber], lokoAddr);
-  delay(2000);
   Serial.println(a[randNumber]);
 }
 
 void rideTwoTrainsIntoTheHorizon(int loko1, int loko2){
-  Serial.println("Random værdier for loko1");
-  randomSpeed(loko1);
-  Serial.println("Random værdier for loko2");
-  randomSpeed(loko2);
+  if (timeMillis+10000<millis()){
+    Serial.println("Random værdier for loko1");
+    randomSpeed(loko1);
+    Serial.println("Random værdier for loko2");
+    randomSpeed(loko2);
+    timeMillis = millis();
+  }
 }
 
 
@@ -326,8 +330,8 @@ void setup()
   assembleAndSendSignalSwitchBytes(233, 0);
   assembleAndSendSignalSwitchBytes(234, 1);
 
-  assembleAndSendSignalSwitchBytes(241, 1);
-  assembleAndSendSignalSwitchBytes(249, 0);
+  /*assembleAndSendSignalSwitchBytes(241, 1);
+  assembleAndSendSignalSwitchBytes(249, 0);*/
 
   //assembleAndSendSignalSwitchBytes(252, 0);
   //assembleAndSendSignalSwitchBytes(241, 0);
@@ -338,9 +342,11 @@ void setup()
 
 void loop()
 {
-  //rideTwoTrainsIntoTheHorizon(40, 8);
-  assembleAndSendSpeed(0x6F, 40);
-  assembleAndSendSpeed(0x4F, 8);
+  //assembleAndSendSpeed(0x61, 40);
+  //assembleAndSendSpeed(0x61, 8);
+  rideTwoTrainsIntoTheHorizon(40, 8);
+  //assembleAndSendSpeed(0x6F, 40);
+  //assembleAndSendSpeed(0x4F, 8);
   //randomSpeed(40);
   //randomSpeed(8);
   int l = distance(trigPin,echoPin);
@@ -369,23 +375,29 @@ void trainPassed(bool innerTrain){
     for (int signalAddress: innerTracksSwitches) {
       assembleAndSendSignalSwitchBytes(signalAddress, 0);
     }
+    delay(3000);
     for (int signalAddress: innerTrackSignals) {
       assembleAndSendSignalSwitchBytes(signalAddress, 1);
     }
   }else{
-    for (int switchAddress: outerTwoTracksSwitches) {
+    for (int switchAddress: outerTracksSwitches) {
       assembleAndSendSignalSwitchBytes(switchAddress, 0);
     }
+    for (int signalAddress: innerTracksSwitches) {
+      assembleAndSendSignalSwitchBytes(signalAddress, 1);
+    }
+    delay(3000);
     for (int signalAddress: outerTrackSignals) {
       assembleAndSendSignalSwitchBytes(signalAddress, 1);
     }
   }
   Serial.println("Delay starter");
-  delay(20000);
+  delay(10000);
   Serial.println("Delay slutter");
   bool passed = false;
   lastL = 0;
   while (passed == false){
+    rideTwoTrainsIntoTheHorizon(40, 8);
     int l = distance(trigPin,echoPin);
     Serial.println(l);
     if (l < 5 && lastL <5) {
@@ -403,6 +415,7 @@ void trainPassed(bool innerTrain){
     for (int signalAddress: innerTrackSignals) {
       assembleAndSendSignalSwitchBytes(signalAddress, 0);
     }
+    delay(3000);
     for (int signalAddress: innerTracksSwitches) {
       assembleAndSendSignalSwitchBytes(signalAddress, 1);
     }
@@ -410,6 +423,7 @@ void trainPassed(bool innerTrain){
     for (int signalAddress: outerTrackSignals) {
       assembleAndSendSignalSwitchBytes(signalAddress, 0);
     }
+    delay(3000);
     for (int switchAddress: outerTwoTracksSwitches) {
       assembleAndSendSignalSwitchBytes(switchAddress, 1);
     }
@@ -420,7 +434,7 @@ void trainPassed(bool innerTrain){
   for (int signalAddress: innerTrackSignals) {
       assembleAndSendSignalSwitchBytes(signalAddress, 1);
   }
-  delay(5000);
+  delay(2000);
 }
 
 
