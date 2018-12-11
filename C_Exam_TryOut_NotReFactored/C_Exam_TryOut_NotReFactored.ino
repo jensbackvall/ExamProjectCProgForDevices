@@ -50,7 +50,7 @@ int output = 3;
 int starttal = 3;
 
 long randNumber;
-int a[3] = {0x62, 0x69, 0x6F};
+int a[3] = {0x64, 0x69, 0x6F};
 
 int outerTrackSignals[] = {152, 142, 141, 122, 121, 131, 132, 151};
 int innerTrackSignals[] = {112, 102, 101, 82, 81, 91, 92, 111};
@@ -329,7 +329,7 @@ void setup()
 
   assembleAndSendSignalSwitchBytes(233, 0);
   assembleAndSendSignalSwitchBytes(234, 1);
-
+  delay(5000);
   /*assembleAndSendSignalSwitchBytes(241, 1);
   assembleAndSendSignalSwitchBytes(249, 0);*/
 
@@ -342,9 +342,9 @@ void setup()
 
 void loop()
 {
-  //assembleAndSendSpeed(0x61, 40);
-  //assembleAndSendSpeed(0x61, 8);
-  rideTwoTrainsIntoTheHorizon(40, 8);
+  assembleAndSendSpeed(0x61, 40);
+  assembleAndSendSpeed(0x61, 8);
+  //rideTwoTrainsIntoTheHorizon(40, 8);
   //assembleAndSendSpeed(0x6F, 40);
   //assembleAndSendSpeed(0x4F, 8);
   //randomSpeed(40);
