@@ -1,6 +1,6 @@
-#ifndef ULTRA_LYD
-#define ULTRA_LYD
+#ifndef SETUP_TRAIN_TRACK
+#define SETUP_TRAIN_TRACK
 
-int distance(int,int);
+void startUpSignalsAndSwitchesFunction();
 
 #endif

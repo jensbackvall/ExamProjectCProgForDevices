@@ -1,35 +1,18 @@
-/*
-   Simpelt program til at sende en frame i DCC format til et tog ved hjælp af interrupt.
-   Interface:
-   Anbring lokomotivnummeret i den globale variabel lokoadr. f.eks 36.
-   Anbring kommandoen i variablen data f.eks. 0X64 forlængs med speed 4, 0X44 baglænge med speed 4.
-   Der sendes kontinuerligt frames det er op til dig at sørge for korrekt lokoadr og data.
+#include <arduino.h>
+#include "DataFuncs.h"
 
-*/
-#include "Ultralyd.h"
-#include "SetupTrainTrack.h"
-#include "TrainSignalSwitchFunctions.h"
-
-
-#define DCC_PIN  6                     // DCC out
-#define trigPin 9
-#define echoPin 10
-#define MAXMSG  2
+#define DCC_PIN 6                      // DCC out
 #define TIMER_SHORT 0x8D               // 58usec pulse length 141 255-141=114
 #define TIMER_LONG  0x1B               // 116usec pulse length 27 255-27 =228
-
 #define PREAMBLE  0                    // definitions for state machine
 #define SEPERATOR 1                    // definitions for state machine
 #define SENDBYTE  2                    // definitions for state machine
+#define MAXMSG  2
 
-int analogin = A0;
-int sensorValue = 0;
-int outputValue = 0;
-int speedValue = 0X60;
-unsigned char currentSettingSignalOrSwitch = 0;
-unsigned char lastOrder = 0x80;
+int msgIndex = 0;
+int byteIndex = 0;
+bool second_isr = false;               // pulse up or down
 unsigned char last_timer = TIMER_SHORT; // store last timer value
-
 unsigned char flag = 0;                // used for short or long pulse
 unsigned char state = PREAMBLE;
 unsigned char preamble_count = 16;
@@ -37,19 +20,8 @@ unsigned char outbyte = 0;
 unsigned char cbit = 0x80;
 unsigned char preample1;               // global variabel for preample part 1
 unsigned char preample2;               // global variabel for preample part 2
-
-int output = 3;
-int starttal = 3;
-bool startUpSignalsAndSwitches = false;
-
-
-
-
-struct Message msg[MAXMSG] =
-{
-  { { 0xFF,     0, 0xFF, 0, 0, 0, 0}, 3},   // idle msg
-  { { 0xFF,     0, 0xFF, 0, 0, 0, 0}, 3}    // message
-};
+unsigned char lokoadr = 40;            // global variabel adresse
+unsigned char data = 96;               // global variabel kommando
 
 
 struct Message                         // buffer for command
@@ -58,6 +30,23 @@ struct Message                         // buffer for command
   unsigned char len;
 };
 
+struct Message msg[MAXMSG] =
+{
+  { { 0xFF,     0, 0xFF, 0, 0, 0, 0}, 3},   // idle msg
+  { { 0xFF,     0, 0xFF, 0, 0, 0, 0}, 3}    // message
+};
+
+void assemble_dcc_msg()
+{
+  noInterrupts();  // make sure that only "matching" parts of the message are used in ISR
+  msg[1].data[0] = lokoadr;
+  msg[1].data[1] = data;
+  msg[1].data[2] = lokoadr ^ data;
+  interrupts();
+}
+
+// TCCR2A, TCCR2B, TIMSK2, TCNT2 as well as TIMER2_OVF_vect i ISR are all defined in the arduino,
+// and thus are not defined in this scope, but are accessed via arduino.h
 void SetupTimer2()
 {
   TCCR2A = 0; //page 203 - 206 ATmega328/P
@@ -144,48 +133,17 @@ ISR(TIMER2_OVF_vect) //Timer2 overflow interrupt vector handler
   }
 }
 
-
-
-
-
-
-void setup()
-{
-  // put your setup code here, to run once:
-  Serial.begin(115200);
-  pinMode(DCC_PIN, OUTPUT);
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT);
-  // enable styrepin som output på pin 6
-  SetupTimer2();
-  
-  randomSeed(analogRead(0));
-
+void setData(unsigned char incData) {
+  data = incData;
 }
 
-void loop()
-{
-  //rideTwoTrainsIntoTheHorizon(40, 8);
-  assembleAndSendSpeed(0x61, 40);
-  assembleAndSendSpeed(0x61, 8);
-  //randomSpeed(40);
-  //randomSpeed(8);
-  int l = distance(trigPin,echoPin);
-  Serial.println(l);
-  if (l < 5) {
-        Serial.println("TRAIN ON OUTER TRACK");
-        delay(500);
-  } else if (l > 9 && l < 14) {
-        Serial.println("TRAIN ON INNER TRACK");
-        delay(500);
-  } else {
-        Serial.println("NO TRAIN RIGHT NOW");
-  }
-  /*if (startUpSignalsAndSwitches == false) {
-    startUpSignalsAndSwitchesFunction();
-    startUpSignalsAndSwitches = true;
-  }*/
 
-  
-  
+void assemble_dcc_msg()
+{
+  noInterrupts();  // make sure that only "matching" parts of the message are used in ISR
+  msg[1].data[0] = lokoadr;
+  msg[1].data[1] = data;
+  msg[1].data[2] = lokoadr ^ data;
+
+  interrupts();
 }
