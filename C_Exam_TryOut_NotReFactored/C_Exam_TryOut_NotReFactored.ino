@@ -165,12 +165,15 @@ ISR(TIMER2_OVF_vect) //Timer2 overflow interrupt vector handler
     }
   }
 }
+
+
+
 // Function for setting the speed newSpeed of a specific train with address lokoAddr
 void assembleAndSendSpeed(unsigned char newSpeed, unsigned char lokoAddr) {
   data = newSpeed;
   assemble_dcc_msg(lokoAddr);
   delay(50);
-}
+} // SKal være i TrainFunctions.h
 
 
 // Function for controlling the boolean value of a switch or a signal
@@ -207,14 +210,9 @@ void assembleAndSendSignalSwitchBytes (int switchOrSignalAddress, int greenRedSt
 
   assemble_dcc_msg(signalSwitchDataByteOne);
 
-}
+} // Skal være i SignalAndSwitchFunctions.h
 
-//void computeSignalSwitchDataByteOne (unsigned char accAddress) {
-//  signalSwitchDataByteOne = accAddress + 128;
-//}
 
-// TODO: ændring af regaddr virker ikke helt, så når vi eksempelvis vil skifte signal nr 152, fungerer det ikke.
-// Dette skal ordnes!
 void computeSignalSwitchDataByteTwo (unsigned char fifthBit, unsigned char eigthBit) {
   signalSwitchDataByteTwo = 240;
   if (fifthBit == 1) {
@@ -238,7 +236,7 @@ void computeSignalSwitchDataByteTwo (unsigned char fifthBit, unsigned char eigth
   } else {
     signalSwitchDataByteTwo = signalSwitchDataByteTwo ^ 0;
   }
-}
+} // Skal være i SignalAndSwitchFunctions.h
 
 void startUpSignalsAndSwitchesFunction() {
   for (int switchAddress: outerTwoTracksSwitches) {
@@ -259,7 +257,7 @@ void startUpSignalsAndSwitchesFunction() {
         assembleAndSendSignalSwitchBytes(outerTrackSignals[i - 1], 0);
         assembleAndSendSignalSwitchBytes(innerTrackSignals[i - 1], 0);
       }
-  }
+  } 
   
   for (int signalAddress: allSignals) {
       assembleAndSendSignalSwitchBytes(signalAddress, 1);
@@ -268,13 +266,13 @@ void startUpSignalsAndSwitchesFunction() {
       assembleAndSendSignalSwitchBytes(switchAddress, 1);
   }
 
-}
+} // Skal være i SignalAndSwitchFunctions.h
 
 void randomSpeed(unsigned char lokoAddr) {
   randNumber = random(0, 3);
   assembleAndSendSpeed(a[randNumber], lokoAddr);
   Serial.println(a[randNumber]);
-}
+} // Skal være i TrainFunctions.h
 
 void rideTwoTrainsIntoTheHorizon(int loko1, int loko2){
   if (timeMillis+10000<millis()){
@@ -284,7 +282,7 @@ void rideTwoTrainsIntoTheHorizon(int loko1, int loko2){
     randomSpeed(loko2);
     timeMillis = millis();
   }
-}
+} // Skal være i TrainFunctions.h
 
 
 
@@ -366,7 +364,7 @@ void trainPassed(bool innerTrain){
     for (int signalAddress: outerTrackSignals) {
       assembleAndSendSignalSwitchBytes(signalAddress, 1);
     }
-  }
+  } 
   Serial.println("Delay starter");
   delay(10000);
   Serial.println("Delay slutter");
@@ -411,7 +409,7 @@ void trainPassed(bool innerTrain){
       assembleAndSendSignalSwitchBytes(signalAddress, 1);
   }
   delay(2000);
-}
+} // Skal være i TrainFunctions.h
 
 
 
