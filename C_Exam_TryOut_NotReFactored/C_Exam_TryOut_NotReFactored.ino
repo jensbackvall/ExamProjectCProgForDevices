@@ -172,30 +172,6 @@ void assembleAndSendSpeed(unsigned char newSpeed, unsigned char lokoAddr) {
   delay(50);
 }
 
-/* void assembleAndSendOrder(unsigned char trainFunction) {
-
-  unsigned char newOrder;
-
-  if (trainFunction == 7) {
-    newOrder = lastOrder ^ 16; // changes the fifth bit
-  } else if (trainFunction == 8) {
-    newOrder = lastOrder ^ 4; // changes the third bit
-  } else if (trainFunction == 9) {
-    newOrder = lastOrder ^ 1; // changes the first bit
-  } else {
-    return;
-  }
-
-  data = newOrder;
-  
-  assemble_dcc_msg(lokoadr);
-
-  lastOrder = data;
-
-  delay(750);
-} */
-
-
 
 // Function for controlling the boolean value of a switch or a signal
 void assembleAndSendSignalSwitchBytes (int switchOrSignalAddress, int greenRedStraightTurnBoolean) {
