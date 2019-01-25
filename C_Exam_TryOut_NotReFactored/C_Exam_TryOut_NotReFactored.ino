@@ -51,11 +51,8 @@ int starttal = 3;
 long randNumber;
 int a[3] = {0x64, 0x69, 0x6F};
 
-int* allSignals = malloc(28 * sizeof(int));
-int tempAllSignalsArray[] = {152, 142, 141, 122, 121, 131, 132, 151, 112, 102, 101, 82, 81, 91, 92, 111, 31, 42, 41, 32, 11, 12, 52, 61, 21, 22, 51, 62};
-
-
-
+// Assign a pointer to a position for an array of signaladdresse with malloc
+int* allSignals = (int*)malloc(28 * sizeof(int));
 int outerTrackSignals[] = {152, 142, 141, 122, 121, 131, 132, 151};
 int innerTrackSignals[] = {112, 102, 101, 82, 81, 91, 92, 111};
 int outerTwoTracksSwitches[] = {252, 244, 250, 242, 249, 241, 251, 243};
@@ -176,8 +173,7 @@ void assembleAndSendSpeed(unsigned char newSpeed, unsigned char lokoAddr) {
   data = newSpeed;
   assemble_dcc_msg(lokoAddr);
   delay(50);
-} // SKal være i TrainFunctions.h
-
+}
 
 // Function for controlling the boolean value of a switch or a signal
 void assembleAndSendSignalSwitchBytes (int switchOrSignalAddress, int greenRedStraightTurnBoolean) {
@@ -213,8 +209,7 @@ void assembleAndSendSignalSwitchBytes (int switchOrSignalAddress, int greenRedSt
 
   assemble_dcc_msg(signalSwitchDataByteOne);
 
-} // Skal være i SignalAndSwitchFunctions.h
-
+}
 
 void computeSignalSwitchDataByteTwo (unsigned char fifthBit, unsigned char eigthBit) {
   signalSwitchDataByteTwo = 240;
@@ -238,7 +233,7 @@ void computeSignalSwitchDataByteTwo (unsigned char fifthBit, unsigned char eigth
   } else {
     signalSwitchDataByteTwo = signalSwitchDataByteTwo ^ 0;
   }
-} // Skal være i SignalAndSwitchFunctions.h
+}
 
 void startUpSignalsAndSwitchesFunction() {
   for (int switchAddress: outerTwoTracksSwitches) {
@@ -261,20 +256,21 @@ void startUpSignalsAndSwitchesFunction() {
       }
   } 
   
-  for (int signalAddress: allSignals) {
-      assembleAndSendSignalSwitchBytes(signalAddress, 1);
+  for (int j = 0; j < 28; j++) {
+      assembleAndSendSignalSwitchBytes(allSignals[j], 1);
   }
+  free(allSignals);
   for (int switchAddress: outerTwoTracksSwitches) {
       assembleAndSendSignalSwitchBytes(switchAddress, 1);
   }
 
-} // Skal være i SignalAndSwitchFunctions.h
+}
 
 void randomSpeed(unsigned char lokoAddr) {
   randNumber = random(0, 3);
   assembleAndSendSpeed(a[randNumber], lokoAddr);
   Serial.println(a[randNumber]);
-} // Skal være i TrainFunctions.h
+}
 
 void rideTwoTrainsIntoTheHorizon(int loko1, int loko2){
   if (timeMillis+10000<millis()){
@@ -284,33 +280,31 @@ void rideTwoTrainsIntoTheHorizon(int loko1, int loko2){
     randomSpeed(loko2);
     timeMillis = millis();
   }
-} // Skal være i TrainFunctions.h
+}
 
 
 
 void setup()
 {
-  // put your setup code here, to run once:
   Serial.begin(115200);
   pinMode(DCC_PIN, OUTPUT);
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
-  // enable styrepin som output på pin 6
+
+ // Fill our memory allocated array with vallues for signals. The temporary array will automaticcaly be discarded when setup function ends
+  int tempAllSignalsArray[] = {152, 142, 141, 122, 121, 131, 132, 151, 112, 102, 101, 82, 81, 91, 92, 111, 31, 42, 41, 32, 11, 12, 52, 61, 21, 22, 51, 62};
+
+  for(int i = 0; i < 28; i++) {
+    allSignals[i] = tempAllSignalsArray[i];
+  }
+  
   SetupTimer2();
-  assembleAndSendSpeed(0x61, 40);
-  assembleAndSendSpeed(0x61, 8);
   startUpSignalsAndSwitchesFunction();
   assembleAndSendSignalSwitchBytes(231, 1);
   assembleAndSendSignalSwitchBytes(232, 0);
-
   assembleAndSendSignalSwitchBytes(233, 0);
   assembleAndSendSignalSwitchBytes(234, 1);
   delay(5000);
-  /*assembleAndSendSignalSwitchBytes(241, 1);
-  assembleAndSendSignalSwitchBytes(249, 0);*/
-
-  //assembleAndSendSignalSwitchBytes(252, 0);
-  //assembleAndSendSignalSwitchBytes(241, 0);
   
   randomSeed(analogRead(0));
 
@@ -318,13 +312,7 @@ void setup()
 
 void loop()
 {
-  assembleAndSendSpeed(0x61, 40);
-  assembleAndSendSpeed(0x61, 8);
-  //rideTwoTrainsIntoTheHorizon(40, 8);
-  //assembleAndSendSpeed(0x6F, 40);
-  //assembleAndSendSpeed(0x4F, 8);
-  //randomSpeed(40);
-  //randomSpeed(8);
+  rideTwoTrainsIntoTheHorizon(40, 8);
   int l = distance(trigPin,echoPin);
   Serial.println(l);
   if (l < 5 && lastL < 5) {
@@ -421,10 +409,5 @@ void assemble_dcc_msg(unsigned char lokoAddr)
   msg[1].data[0] = lokoAddr;
   msg[1].data[1] = data;
   msg[1].data[2] = lokoAddr ^ data;
-  //Serial.print(lokoadr);
-  //Serial.print("  ");
-  //Serial.print(data);
-  //Serial.println();
-
   interrupts();
 }
