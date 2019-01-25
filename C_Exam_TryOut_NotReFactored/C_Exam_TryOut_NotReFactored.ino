@@ -399,7 +399,7 @@ void trainPassed(bool innerTrain){
       assembleAndSendSignalSwitchBytes(signalAddress, 1);
   }
   delay(2000);
-} // Skal være i TrainFunctions.h
+}
 
 
 
