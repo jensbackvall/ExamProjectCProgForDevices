@@ -4,7 +4,6 @@
    Anbring lokomotivnummeret i den globale variabel lokoadr. f.eks 36.
    Anbring kommandoen i variablen data f.eks. 0X64 forlængs med speed 4, 0X44 baglænge med speed 4.
    Der sendes kontinuerligt frames det er op til dig at sørge for korrekt lokoadr og data.
-
 */
 #include "Ultralyd.h"
 
@@ -52,9 +51,13 @@ int starttal = 3;
 long randNumber;
 int a[3] = {0x64, 0x69, 0x6F};
 
+int* allSignals = malloc(28 * sizeof(int));
+int tempAllSignalsArray[] = {152, 142, 141, 122, 121, 131, 132, 151, 112, 102, 101, 82, 81, 91, 92, 111, 31, 42, 41, 32, 11, 12, 52, 61, 21, 22, 51, 62};
+
+
+
 int outerTrackSignals[] = {152, 142, 141, 122, 121, 131, 132, 151};
 int innerTrackSignals[] = {112, 102, 101, 82, 81, 91, 92, 111};
-int allSignals[] = {152, 142, 141, 122, 121, 131, 132, 151,112, 102, 101, 82, 81, 91, 92, 111, 31, 42, 41, 32, 11, 12, 52, 61, 21, 22, 51, 62};
 int outerTwoTracksSwitches[] = {252, 244, 250, 242, 249, 241, 251, 243};
 int innerTracksSwitches[] = {244,242,241,243};
 int outerTracksSwitches[] = {252,250,249,251};
@@ -229,7 +232,6 @@ void computeSignalSwitchDataByteTwo (unsigned char fifthBit, unsigned char eigth
     signalSwitchDataByteTwo = signalSwitchDataByteTwo ^ 2;
 
   }
-
 
   if (eigthBit == 1) {
     signalSwitchDataByteTwo = signalSwitchDataByteTwo ^ 1;
