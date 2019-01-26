@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 
+
 // Function for getting the ultrasound distance
 int distance(int trigPin,int echoPin) {
   delay(10);

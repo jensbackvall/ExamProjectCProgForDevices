@@ -10,12 +10,10 @@
 #define DCC_PIN  6                     // DCC out
 #define soundPin 2
 #define hornPin 7
-
 // 58 mikrosekunder med høj efterfulgt af 58 mikrosekunder med lav giver en bit på 1
 #define TIMER_SHORT 0x8D               // 58usec pulse length 141 255-141=114
 //116 mikrosekunder med høj efterfulgt af 116 mikrosekunder med lav giver en bit på 0
 #define TIMER_LONG  0x1B               // 116usec pulse length 27 255-27 =228
-
 #define PREAMBLE  0                    // definitions for state machine
 #define SEPERATOR 1                    // definitions for state machine
 #define SENDBYTE  2                    // definitions for state machine
