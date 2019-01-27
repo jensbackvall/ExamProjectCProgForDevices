@@ -195,7 +195,6 @@ void assembleAndSendSignalSwitchBytes (int switchOrSignalAddress, int greenRedSt
   accAddress = accAddress & 63;
 
   signalSwitchDataByteOne = accAddress + 128;
-  //assemble_dcc_msg(signalSwitchDataByteOne);
   
   delay(30);
 
