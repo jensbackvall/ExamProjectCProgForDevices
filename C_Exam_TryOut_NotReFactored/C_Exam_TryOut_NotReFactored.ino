@@ -184,7 +184,7 @@ void assembleAndSendSignalSwitchBytes (int switchOrSignalAddress, int greenRedSt
   // Set the layoutaddress to the address of the signal or switch to be controlled
   layoutAddress = switchOrSignalAddress;
  
-  accAddress = layoutAddress / 4 + 1;
+  accAddress = (layoutAddress / 4) + 1;
   regAddress = ((layoutAddress % 4) - 1);
 
   if (regAddress < 0) {
@@ -194,7 +194,7 @@ void assembleAndSendSignalSwitchBytes (int switchOrSignalAddress, int greenRedSt
   
   accAddress = accAddress & 63;
 
-  signalSwitchDataByteOne = accAddress + 128;
+  signalSwitchDataByteOne = accAddress + 128; // eigth bit is always 1
   
   delay(30);
 
