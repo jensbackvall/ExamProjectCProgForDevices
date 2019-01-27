@@ -92,7 +92,7 @@ void SetupTimer2()
   TCNT2 = TIMER_SHORT; //load the timer for its first cycle
 }
 
-ISR(TIMER2_OVF_vect) //Timer2 overflow interrupt vector handler
+ISR(TIMER2_OVF_vect) //Timer2 overflow interrupt vector handler. ISR: Interrupt Service Routine
 {
   unsigned char latency;
 
@@ -295,7 +295,7 @@ void setup()
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
 
- // Fill our memory allocated array with vallues for signals. The temporary array will automaticcaly be discarded when setup function ends
+ // Fill our memory allocated array with values for signals. The temporary array will automatically be discarded when setup function ends
   int tempAllSignalsArray[] = {152, 142, 141, 122, 121, 131, 132, 151, 112, 102, 101, 82, 81, 91, 92, 111, 31, 42, 41, 32, 11, 12, 52, 61, 21, 22, 51, 62};
   if (allSignals != NULL) {
     for(int i = 0; i < 28; i++) {
