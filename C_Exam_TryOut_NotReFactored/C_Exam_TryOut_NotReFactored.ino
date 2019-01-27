@@ -56,7 +56,7 @@ int a[3] = {0x64, 0x69, 0x6F};
 
 // Assign a pointer to a position for an array of signaladdresses with malloc
 int* allSignals = (int*)malloc(28 * sizeof(int)); // This can also be written as: (int*)malloc(28 * sizeof allSignals);
-// sizeof is NOT a function, so the paranthesis are redundant and sizeof(int) repeats the type we started with, so sizeof allSignals is perhaps better...
+// sizeof is an operator, NOT a function, so the paranthesis are redundant and sizeof(int) repeats the type we started with, so sizeof allSignals is perhaps better...
 int outerTrackSignals[] = {152, 142, 141, 122, 121, 131, 132, 151};
 int innerTrackSignals[] = {112, 102, 101, 82, 81, 91, 92, 111};
 int outerTwoTracksSwitches[] = {252, 244, 250, 242, 249, 241, 251, 243};
@@ -294,7 +294,7 @@ void setup()
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
 
- // Fill our memory allocated array with values for signals. The temporary array will automatically be discarded when setup function ends
+ // Fill our memory allocated for allSignals array with values for signals. The temporary array will automatically be discarded when setup function ends
   int tempAllSignalsArray[] = {152, 142, 141, 122, 121, 131, 132, 151, 112, 102, 101, 82, 81, 91, 92, 111, 31, 42, 41, 32, 11, 12, 52, 61, 21, 22, 51, 62};
   if (allSignals != NULL) {
     for(int i = 0; i < 28; i++) {
