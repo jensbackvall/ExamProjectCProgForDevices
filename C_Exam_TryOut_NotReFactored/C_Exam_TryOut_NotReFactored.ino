@@ -295,10 +295,12 @@ void setup()
 
  // Fill our memory allocated array with vallues for signals. The temporary array will automaticcaly be discarded when setup function ends
   int tempAllSignalsArray[] = {152, 142, 141, 122, 121, 131, 132, 151, 112, 102, 101, 82, 81, 91, 92, 111, 31, 42, 41, 32, 11, 12, 52, 61, 21, 22, 51, 62};
-
-  for(int i = 0; i < 28; i++) {
+  if (allSignals != NULL) {
+    for(int i = 0; i < 28; i++) {
     allSignals[i] = tempAllSignalsArray[i];
+    }
   }
+  
   
   SetupTimer2();
   startUpSignalsAndSwitchesFunction();
